@@ -1,6 +1,5 @@
-import React from "react";
-import "./App.css";
-import PostcardCreator from "./components/postcard/PostcardCreator";
+import React from 'react';
+import PostcardCreator from './components/PostcardCreator';
 
 function App() {
   return (
