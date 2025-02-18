@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://howdyimkai.github.io/meowmemorylane",
+"homepage": "https://howdyimkai.github.io/meowmemorylane/",
   "dependencies": {
     "@emailjs/browser": "3.11.0",
     "@firebase/storage": "^0.13.5",
