@@ -13,11 +13,11 @@ interface ToySelectorProps {
 
 const ToySelector: React.FC<ToySelectorProps> = ({ onToySelect, selectedToyId }) => {
   const toys = [
-    { id: 'yarn', src: '/toys/yarn.png', alt: 'Ball of Yarn' },
-    { id: 'laser', src: '/toys/laser.png', alt: 'Laser Pointer' },
-    { id: 'mouse', src: '/toys/mouse.png', alt: 'Mouse Toy' },
-    { id: 'treats', src: '/toys/treats.png', alt: 'Cat Treats' },
-    { id: 'cattree', src: '/toys/cat tree.png', alt: 'Cat Tree' }
+    { id: 'yarn', src: './toys/yarn.png', alt: 'Ball of Yarn' },
+    { id: 'laser', src: './toys/laser.png', alt: 'Laser Pointer' },
+    { id: 'mouse', src: './toys/mouse.png', alt: 'Mouse Toy' },
+    { id: 'treats', src: './toys/treats.png', alt: 'Cat Treats' },
+    { id: 'cattree', src: './toys/cat-tree.png', alt: 'Cat Tree' }
   ];
 
   return (
