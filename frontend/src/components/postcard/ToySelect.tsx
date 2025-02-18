@@ -11,11 +11,11 @@ interface ToySelectProps {
 }
 
 const TOYS: Toy[] = [
-  { id: "laser", name: "Laser Pointer", icon: process.env.PUBLIC_URL + "/toys/laser.png" },
-  { id: "yarn", name: "Ball of Yarn", icon: process.env.PUBLIC_URL + "/toys/yarn.png" },
-  { id: "mouse", name: "Squeaky Mouse", icon: process.env.PUBLIC_URL + "/toys/mouse.png" },
-  { id: "tree", name: "Cat Tree", icon: process.env.PUBLIC_URL + "/toys/cat-tree.png" },
-  { id: "treats", name: "Cat Treats", icon: process.env.PUBLIC_URL + "/toys/treats.png" },
+  { id: "laser", name: "Laser Pointer", icon: "/meowmemorylane/toys/laser.png" },
+  { id: "yarn", name: "Ball of Yarn", icon: "/meowmemorylane/toys/yarn.png" },
+  { id: "mouse", name: "Squeaky Mouse", icon: "/meowmemorylane/toys/mouse.png" },
+  { id: "tree", name: "Cat Tree", icon: "/meowmemorylane/toys/cat-tree.png" },
+  { id: "treats", name: "Cat Treats", icon: "/meowmemorylane/toys/treats.png" },
 ];
 
 const ToySelect: React.FC<ToySelectProps> = ({ onToySelect }) => {

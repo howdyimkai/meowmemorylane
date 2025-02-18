@@ -55,8 +55,8 @@ const PostcardCreator: React.FC = () => {
                   position={toy.position}
                   onStop={(e, data) => handleToyDrag(index, e, data)}
                 >
-                  <div className="absolute cursor-move text-4xl">
-                    {toy.icon}
+                  <div className="absolute cursor-move">
+                    <img src={toy.icon} alt={toy.name} className="w-12 h-12 object-contain" />
                   </div>
                 </Draggable>
               ))}
