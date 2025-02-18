@@ -32,6 +32,8 @@ jobs:
         run: |
           cd frontend
           npm run build
+        env:
+          CI: false
           
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
