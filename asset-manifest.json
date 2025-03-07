@@ -1,17 +1,22 @@
 {
   "files": {
-    "main.css": "/meowmemorylane/static/css/main.81d3f669.css",
-    "main.js": "/meowmemorylane/static/js/main.df4c8769.js",
+    "main.css": "/meowmemorylane/static/css/main.6fe9a957.css",
+    "main.js": "/meowmemorylane/static/js/main.660bd974.js",
     "static/js/952.9e8c73d7.chunk.js": "/meowmemorylane/static/js/952.9e8c73d7.chunk.js",
     "static/js/453.8ab44547.chunk.js": "/meowmemorylane/static/js/453.8ab44547.chunk.js",
+    "static/media/victorian-home.png": "/meowmemorylane/static/media/victorian-home.90eca97016fc1e71a094.png",
+    "static/media/yarn.png": "/meowmemorylane/static/media/yarn.4a0f5195c6d3adf7ad54.png",
+    "static/media/treats.png": "/meowmemorylane/static/media/treats.69fa88fa494ff9b9fea3.png",
+    "static/media/cat-tree.png": "/meowmemorylane/static/media/cat-tree.0366322307c7d96c8cbc.png",
+    "static/media/mouse.png": "/meowmemorylane/static/media/mouse.1ab2a59fdae2021d4f96.png",
     "index.html": "/meowmemorylane/index.html",
-    "main.81d3f669.css.map": "/meowmemorylane/static/css/main.81d3f669.css.map",
-    "main.df4c8769.js.map": "/meowmemorylane/static/js/main.df4c8769.js.map",
+    "main.6fe9a957.css.map": "/meowmemorylane/static/css/main.6fe9a957.css.map",
+    "main.660bd974.js.map": "/meowmemorylane/static/js/main.660bd974.js.map",
     "952.9e8c73d7.chunk.js.map": "/meowmemorylane/static/js/952.9e8c73d7.chunk.js.map",
     "453.8ab44547.chunk.js.map": "/meowmemorylane/static/js/453.8ab44547.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.81d3f669.css",
-    "static/js/main.df4c8769.js"
+    "static/css/main.6fe9a957.css",
+    "static/js/main.660bd974.js"
   ]
 }
