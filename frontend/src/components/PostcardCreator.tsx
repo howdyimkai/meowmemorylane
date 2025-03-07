@@ -4,6 +4,8 @@ import ImageUploader from './ImageUploader';
 import ToySelector from './ToySelector';
 import { generateFirstMessage } from '../utils/messageGenerator';
 import { uploadImage } from '../utils/uploadImage';
+import { saveUserPreferences } from '../utils/database/userPreferences';
+import { getAppImage } from '../utils/imageImports';
 
 interface SelectedToy {
   id: string;
@@ -12,15 +14,16 @@ interface SelectedToy {
 }
 
 const PostcardCreator = (): ReactElement => {
-  // Initialize EmailJS
-  emailjs.init('z04zSHHFmbUO57sp8');
+  // Initialize EmailJS with User ID from environment variables or fallback
+  const EMAILJS_USER_ID = process.env.REACT_APP_EMAILJS_USER_ID || 'z04zSHHFmbUO57sp8';
+  emailjs.init(EMAILJS_USER_ID);
   
   // State declarations
   const [catName, setCatName] = useState('');
   const [memory, setMemory] = useState('');
   const [catImage, setCatImage] = useState<string | null>(null);
   const [selectedToy, setSelectedToy] = useState<SelectedToy | null>(null);
-  const [step, setStep] = useState<'postcard' | 'email'>('postcard');
+  const [step, setStep] = useState<'postcard' | 'email' | 'success'>('postcard');
   const [email, setEmail] = useState('');
   const [frequency, setFrequency] = useState('daily');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,12 +56,27 @@ const PostcardCreator = (): ReactElement => {
   };
 
   const handleSubmit = async (): Promise<void> => {
+    // Validate all required fields
     if (!catName || !email || !selectedToy || !catImage) {
       alert('Please fill in all required fields and upload a photo');
       return;
     }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
+    // Validate frequency selection
+    if (!['daily', 'weekly', 'monthly'].includes(frequency)) {
+      alert('Please select a valid frequency for your updates');
+      return;
+    }
     
     setIsSubmitting(true);
+    console.log('Submitting with frequency:', frequency);
     try {
       const message = generateFirstMessage({
         catName,
@@ -66,26 +84,72 @@ const PostcardCreator = (): ReactElement => {
         memory
       });
 
-      const response = await emailjs.send(
-        'service_eyhgzzc',
-        'template_xwr06xh',
-        {
+      // Save user preferences to Supabase
+      const { data: savedPreferences, error: saveError } = await saveUserPreferences({
+        email,
+        cat_name: catName,
+        frequency: frequency as 'daily' | 'weekly' | 'monthly',
+        cat_image_url: catImage,
+        selected_toy: selectedToy.id,
+        memory_text: memory
+      });
+
+      if (saveError) {
+        console.error('Error saving preferences:', saveError);
+        
+        // Handle specific Supabase errors
+        if (saveError.code === '23505') { // Unique constraint violation
+          throw new Error(`You've already created a memorial for ${catName}. Please use a different cat name.`);
+        } else {
+          throw new Error('Failed to save your preferences. Please try again.');
+        }
+      }
+
+      console.log('Saved preferences:', savedPreferences);
+
+      try {
+        // Send the first email update
+        console.log('Attempting to send email with EmailJS...');
+        const emailData = {
           to_email: email,
           from_email: 'noreply@meowmemorylane.com',
           cat_name: catName,
           monthly_story: message,
           postcard_url: catImage,
           unsubscribe_url: '#',
-          to_name: 'Friend'
-        },
-        'z04zSHHFmbUO57sp8'
-      );
+          to_name: 'Friend',
+          frequency: frequency // Add frequency to email template
+        };
+        
+        console.log('Email template data:', emailData);
+        
+        const EMAILJS_SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID || 'service_eyhgzzc';
+        const EMAILJS_TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_xwr06xh';
+        
+        const response = await emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          emailData,
+          EMAILJS_USER_ID
+        );
 
-      console.log('EmailJS Response:', response);
-      alert('Welcome to Meow Memory Lane! Check your email for your first update.');
+        console.log('EmailJS Response:', response);
+        // Move to success screen instead of showing an alert
+        setStep('success');
+      } catch (emailError) {
+        console.error('EmailJS Error:', emailError);
+        
+        // For this demo, we'll proceed to success even if email fails
+        // In production, you'd want to handle this differently
+        console.warn('Proceeding to success screen despite email error');
+        setStep('success');
+        
+        // Uncomment this in production to show error to user
+        // throw new Error(`Error sending email: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`);
+      }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error sending email. Please try again.');
+      console.error('Error in form submission:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred. Please try again.'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +161,7 @@ const PostcardCreator = (): ReactElement => {
         <div 
           className="absolute inset-0 w-full h-full"
           style={{
-            backgroundImage: 'url(/images/victorian-home.png)',
+            backgroundImage: `url(${getAppImage('victorianHome')})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             opacity: 0.85
@@ -208,7 +272,7 @@ const PostcardCreator = (): ReactElement => {
   const renderEmailStep = (): ReactElement => (
     <div className="relative rounded-lg shadow-lg overflow-hidden bg-white p-8">
       <img 
-        src="/images/stamp.png" 
+        src={getAppImage('stamp')} 
         alt="Postage Stamp" 
         className="absolute top-4 right-4 w-16 h-16 object-contain"
       />
@@ -232,15 +296,23 @@ const PostcardCreator = (): ReactElement => {
           
           <div>
             <label className="block text-gray-700 mb-2">How often would you like to receive updates?</label>
-            <select
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
+            <div className="relative">
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                disabled={isSubmitting}
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+              {isSubmitting && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-800"></div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-between pt-4">
@@ -263,6 +335,51 @@ const PostcardCreator = (): ReactElement => {
     </div>
   );
 
+  const renderSuccessStep = (): ReactElement => (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden p-8 text-center">
+      <div className="mb-6">
+        <div className="w-16 h-16 bg-green-100 rounded-full mx-auto flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      </div>
+      
+      <h3 className="text-2xl font-medium mb-4" style={{ color: '#1B4332' }}>
+        Thank You for Setting Up {catName}'s Memorial
+      </h3>
+      
+      <p className="text-gray-600 mb-6">
+        Your kitty's first letter is on its way to your inbox. You'll receive updates
+        <strong> {frequency === 'daily' ? 'every day' : frequency === 'weekly' ? 'every week' : 'every month'}</strong> with
+        new adventures from {catName}'s life on Meow Memory Lane.
+      </p>
+      
+      <div className="p-4 bg-gray-50 rounded-lg mb-8">
+        <p className="text-sm text-gray-500">
+          <strong>Email:</strong> {email}<br />
+          <strong>Frequency:</strong> {frequency === 'daily' ? 'Daily' : frequency === 'weekly' ? 'Weekly' : 'Monthly'}
+        </p>
+      </div>
+      
+      <div className="flex justify-center space-x-4">
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-green-800 text-white px-6 py-2 rounded-full hover:bg-green-700 transition-colors"
+        >
+          Create Another Memorial
+        </button>
+
+        <button
+          onClick={() => window.open('https://www.meowmemorylane.com/#submit', '_blank')}
+          className="bg-white border border-green-800 text-green-800 px-6 py-2 rounded-full hover:bg-green-50 transition-colors"
+        >
+          Create Account
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#EEF2FF' }}>
       <div className="max-w-3xl mx-auto py-12 px-4">
@@ -273,10 +390,14 @@ const PostcardCreator = (): ReactElement => {
           Meow Memory Lane
         </h1>
         <h2 className="text-lg text-center text-gray-600 mb-8">
-          Set up mail for your kitty's furever home
+          {step === 'success' ? 'Your kitty has arrived at their furever home' : 'Set up mail for your kitty\'s furever home'}
         </h2>
 
-        {step === 'postcard' ? renderPostcardStep() : renderEmailStep()}
+        {step === 'postcard' 
+          ? renderPostcardStep() 
+          : step === 'email' 
+          ? renderEmailStep() 
+          : renderSuccessStep()}
       </div>
     </div>
   );

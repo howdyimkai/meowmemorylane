@@ -1,4 +1,5 @@
 import React from 'react';
+import { getToyImage } from '../utils/imageImports';
 
 interface ToyInfo {
   id: string;
@@ -13,11 +14,11 @@ interface ToySelectorProps {
 
 const ToySelector: React.FC<ToySelectorProps> = ({ onToySelect, selectedToyId }) => {
   const toys = [
-    { id: 'yarn', src: './toys/yarn.png', alt: 'Ball of Yarn' },
-    { id: 'laser', src: './toys/laser.png', alt: 'Laser Pointer' },
-    { id: 'mouse', src: './toys/mouse.png', alt: 'Mouse Toy' },
-    { id: 'treats', src: './toys/treats.png', alt: 'Cat Treats' },
-    { id: 'cattree', src: './toys/cat-tree.png', alt: 'Cat Tree' }
+    { id: 'yarn', src: getToyImage('yarn'), alt: 'Ball of Yarn' },
+    { id: 'laser', src: getToyImage('laser'), alt: 'Laser Pointer' },
+    { id: 'mouse', src: getToyImage('mouse'), alt: 'Mouse Toy' },
+    { id: 'treats', src: getToyImage('treats'), alt: 'Cat Treats' },
+    { id: 'cattree', src: getToyImage('cattree'), alt: 'Cat Tree' }
   ];
 
   return (
@@ -30,6 +31,12 @@ const ToySelector: React.FC<ToySelectorProps> = ({ onToySelect, selectedToyId })
             className={`w-16 h-16 object-contain cursor-pointer transition-transform hover:scale-110
               ${selectedToyId === toy.id ? 'ring-2 ring-green-500 rounded-full' : ''}`}
             onClick={() => onToySelect(toy)}
+            onError={(e) => {
+              console.error(`Failed to load image: ${toy.src}`);
+              const target = e.target as HTMLImageElement;
+              target.style.backgroundColor = '#f8d7da';
+              target.style.border = '1px solid #dc3545';
+            }}
           />
         </div>
       ))}
