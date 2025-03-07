@@ -28,19 +28,31 @@ export const appImages = {
 
 // Helper function to get the correct image path
 export const getToyImage = (toyId: string): string => {
-  if (toyImages[toyId as keyof typeof toyImages]) {
-    return toyImages[toyId as keyof typeof toyImages];
+  try {
+    if (toyImages[toyId as keyof typeof toyImages]) {
+      return toyImages[toyId as keyof typeof toyImages];
+    }
+  } catch (e) {
+    console.error('Error getting toy image:', e);
   }
   
   // Fallback to public path if import not found
-  return `${process.env.PUBLIC_URL || ''}/toys/${toyId === 'cattree' ? 'cat-tree' : toyId}.png`;
+  // For GitHub Pages, we need to include the repository name in the path
+  const basePath = process.env.PUBLIC_URL || '';
+  return `${basePath}/toys/${toyId === 'cattree' ? 'cat-tree' : toyId}.png`;
 };
 
 export const getAppImage = (imageName: string): string => {
-  if (appImages[imageName as keyof typeof appImages]) {
-    return appImages[imageName as keyof typeof appImages];
+  try {
+    if (appImages[imageName as keyof typeof appImages]) {
+      return appImages[imageName as keyof typeof appImages];
+    }
+  } catch (e) {
+    console.error('Error getting app image:', e);
   }
   
   // Fallback to public path
-  return `${process.env.PUBLIC_URL || ''}/images/${imageName}.png`;
+  // For GitHub Pages, we need to include the repository name in the path
+  const basePath = process.env.PUBLIC_URL || '';
+  return `${basePath}/images/${imageName}.png`;
 };
